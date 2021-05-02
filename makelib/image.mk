@@ -31,12 +31,12 @@ endif
 # supported platform.
 ifeq ($(origin OSBASEIMAGE),undefined)
 OSBASE ?= alpine:3.13
-ifeq ($(ARCH),amd64)
+ifeq ($(TARGETARCH),amd64)
 OSBASEIMAGE = $(OSBASE)
-else ifeq ($(ARCH),arm64)
+else ifeq ($(TARGETARCH),arm64)
 OSBASEIMAGE = arm64v8/$(OSBASE)
 else
-$(error unsupported architecture $(ARCH))
+$(error unsupported architecture $(TARGETARCH))
 endif
 endif
 
@@ -235,8 +235,9 @@ clean: img.clean img.release.clean
 
 publish.init: img.release.build
 
-# only publish images for master and release branches
-ifneq ($(filter master release-%,$(BRANCH_NAME)),)
+# only publish images for main / master and release branches
+# TODO(hasheddan): remove master and support overriding
+ifneq ($(filter main master release-%,$(BRANCH_NAME)),)
 publish.artifacts: $(addprefix img.release.manifest.publish.,$(IMAGES))
 endif
 

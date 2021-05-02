@@ -36,9 +36,13 @@ KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 KUSTOMIZE_VERSION ?= v3.3.0
 KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 
+# the version of olm-bundle to use
+OLMBUNDLE_VERSION ?= v0.4.0
+OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
+
 # the version of helm 3 to use
 USE_HELM3 ?= false
-HELM3_VERSION ?= v3.4.2
+HELM3_VERSION ?= v3.5.3
 HELM3 := $(TOOLS_HOST_DIR)/helm-$(HELM3_VERSION)
 
 # If we enable HELM3 we alias HELM to be HELM3
@@ -79,14 +83,14 @@ $(KIND):
 	@$(INFO) installing kind $(KIND_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR) || $(FAIL)
 	@curl -fsSLo $(KIND) https://github.com/kubernetes-sigs/kind/releases/download/$(KIND_VERSION)/kind-$(SAFEHOSTPLATFORM) || $(FAIL)
-	@chmod +x $(KIND) 
+	@chmod +x $(KIND)
 	@$(OK) installing kind $(KIND_VERSION)
 
 # kubectl download and install
 $(KUBECTL):
 	@$(INFO) installing kubectl $(KUBECTL_VERSION)
 	@curl -fsSLo $(KUBECTL) https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(HOSTOS)/$(SAFEHOSTARCH)/kubectl || $(FAIL)
-	@chmod +x $(KUBECTL) 
+	@chmod +x $(KUBECTL)
 	@$(OK) installing kubectl $(KUBECTL_VERSION)
 
 # kustomize download and install
@@ -98,6 +102,12 @@ $(KUSTOMIZE):
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-kustomize
 	@$(OK) installing kustomize $(KUSTOMIZE_VERSION)
 
+# olm-bundle download and install
+$(OLMBUNDLE):
+	@$(INFO) installing olm-bundle $(OLMBUNDLE_VERSION)
+	@curl -fsSLo $(OLMBUNDLE) https://github.com/upbound/olm-bundle/releases/download/$(OLMBUNDLE_VERSION)/olm-bundle_$(HOST_PLATFORM) || $(FAIL)
+	@chmod +x $(OLMBUNDLE)
+	@$(OK) installing olm-bundle $(OLMBUNDLE_VERSION)
 
 # helm download and install only if helm3 not enabled
 ifeq ($(USE_HELM3),false)
@@ -117,4 +127,4 @@ $(HELM3):
 	@curl -fsSL https://get.helm.sh/helm-$(HELM3_VERSION)-$(SAFEHOSTPLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm3
 	@mv $(TOOLS_HOST_DIR)/tmp-helm3/$(SAFEHOSTPLATFORM)/helm $(HELM3)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm3
-	@$(OK) installing helm3 $(HOSTOS)-$(HOSTARCH)
+	@$(OK) installing helm3 $(SAFEHOSTPLATFORM)

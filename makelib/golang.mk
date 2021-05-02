@@ -52,9 +52,6 @@ ifeq ($(DEBUG),0)
 GO_LDFLAGS += -s -w
 endif
 
-# supported go versions
-GO_SUPPORTED_VERSIONS ?= 1.7|1.8|1.9|1.10|1.11|1.12|1.13|1.14|1.16
-
 # set GOOS and GOARCH
 GOOS := $(OS)
 GOARCH := $(ARCH)
@@ -146,10 +143,6 @@ endif
 # Go Targets
 
 go.init: go.vendor.lite
-	@if ! `$(GO) version | grep -q -E '\bgo($(GO_SUPPORTED_VERSIONS))\b'`; then \
-		$(ERR) unsupported go version. Please make install one of the following supported version: '$(GO_SUPPORTED_VERSIONS)' ;\
-		exit 1 ;\
-	fi
 	@if [ "$(GO111MODULE)" != "on" ] && [ "$(realpath ../../../..)" !=  "$(realpath $(GOPATH))" ]; then \
 		$(WARN) the source directory is not relative to the GOPATH at $(GOPATH) or you are you using symlinks. The build might run into issue. Please move the source directory to be at $(GOPATH)/src/$(GO_PROJECT) ;\
 	fi
@@ -157,7 +150,7 @@ go.init: go.vendor.lite
 go.build:
 	@$(INFO) go build $(PLATFORM)
 	$(foreach p,$(GO_STATIC_PACKAGES),@CGO_ENABLED=0 $(GO) build -v -i -o $(GO_OUT_DIR)/$(lastword $(subst /, ,$(p)))$(GO_OUT_EXT) $(GO_STATIC_FLAGS) $(p) || $(FAIL) ${\n})
-	$(foreach p,$(GO_TEST_PACKAGES) $(GO_LONGHAUL_TEST_PACKAGES),@CGO_ENABLED=0 $(GO) test -i -c -o $(GO_TEST_OUTPUT)/$(lastword $(subst /, ,$(p)))$(GO_OUT_EXT) $(GO_STATIC_FLAGS) $(p) || $(FAIL ${\n}))
+	$(foreach p,$(GO_TEST_PACKAGES) $(GO_LONGHAUL_TEST_PACKAGES),@CGO_ENABLED=0 $(GO) test -i -c -o $(GO_TEST_OUTPUT)/$(lastword $(subst /, ,$(p)))$(GO_OUT_EXT) $(GO_STATIC_FLAGS) $(p) || $(FAIL) ${\n})
 	@$(OK) go build $(PLATFORM)
 
 go.install:

@@ -101,21 +101,14 @@ ifeq ($(filter darwin linux,$(HOSTOS)),)
 $(error build only supported on linux and darwin host currently)
 endif
 
-# Set the host's arch. Only amd64 and arm64 support for now
+# Set the host's arch.
 HOSTARCH := $(shell uname -m)
-ifeq ($(HOSTARCH),x86_64)
-SAFEHOSTARCH := amd64
-TARGETARCH := amd64
-endif
 
 # Set safe architectures for supported OSes (darwin and linux).
 # Apple Silicon binaries are not widely available yet
 ifeq ($(HOSTOS),darwin)
 SAFEHOSTARCH := amd64
-TARGETARCH := arm64
-endif
-ifeq ($(filter amd64 arm64 ,$(SAFEHOSTARCH)),)
-	$(error build only supported on amd64 and arm64 host currently)
+TARGETARCH := $(HOSTARCH)
 endif
 
 # If SAFEHOSTARCH and TARGETARCH have not been defined yet, use HOST
@@ -126,18 +119,26 @@ ifeq ($(origin TARGETARCH), undefined)
 TARGETARCH := $(HOSTARCH)
 endif
 
+# Automatically translate x86_64 to amd64
+ifeq ($(HOSTARCH),x86_64)
+SAFEHOSTARCH := amd64
+TARGETARCH := amd64
+endif
+
+ifeq ($(filter amd64 arm64 ,$(SAFEHOSTARCH)),)
+$(error build only supported on amd64 and arm64 host currently)
+endif
+
 # Standardize Host Platform variables
-HOSTPLATFORM := $(HOSTOS)-$(HOSTARCH)
 HOST_PLATFORM := $(HOSTOS)_$(HOSTARCH)
 SAFEHOSTPLATFORM := $(HOSTOS)-$(SAFEHOSTARCH)
 SAFEHOST_PLATFORM := $(HOSTOS)_$(SAFEHOSTARCH)
-TARGETPLATFORM := $(HOSTOS)-$(TARGETARCH)
 TARGET_PLATFORM := $(HOSTOS)_$(TARGETARCH)
 
 # Set the platform to build if not currently defined
 ifeq ($(origin PLATFORM),undefined)
 PLATFORM := $(TARGET_PLATFORM)
-# if the host platform is on the supported list add it to the single build target
+# if the target platform is on the supported list add it to the single build target
 ifneq ($(filter $(PLATFORMS),$(TARGET_PLATFORM)),)
 BUILD_PLATFORMS = $(TARGET_PLATFORM)
 endif
