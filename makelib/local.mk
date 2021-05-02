@@ -130,6 +130,12 @@ endif
 
 local.down: kind.down local.clean
 
+local.image-load.%: local.prepare $(KUBECTL) $(KUSTOMIZE) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) $(ISTIO) kind.setcontext
+	@$(INFO) localdev load image: $*
+	@$(eval PLATFORMS=$(BUILD_PLATFORMS))
+	@$(SCRIPTS_DIR)/localdev-image-load.sh $* || $(FAIL)
+	@$(OK) localdev load image: $*
+
 local.deploy.%: local.prepare $(KUBECTL) $(KUSTOMIZE) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) $(ISTIO) kind.setcontext
 	@$(INFO) localdev deploy component: $*
 	@$(eval PLATFORMS=$(BUILD_PLATFORMS))
